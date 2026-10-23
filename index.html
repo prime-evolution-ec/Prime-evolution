@@ -38,9 +38,16 @@ header.nav nav a:hover{color:var(--gold)}
 section{padding:64px 0}
 h2{font-size:clamp(2.3rem,7vw,3.8rem);margin-bottom:28px}
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+#buscador{width:100%;background:var(--panel);border:1px solid var(--gold-d);color:var(--text);font:500 1.05rem Barlow,sans-serif;padding:12px 16px;margin-bottom:18px;border-radius:4px}
+#buscador::placeholder{color:var(--muted)}
+.count{color:var(--muted);font-size:.9rem;margin:-10px 0 16px}
 .chips button{background:none;border:1px solid var(--gold-d);color:var(--text);font:600 1rem Barlow,sans-serif;padding:8px 16px;cursor:pointer}
 .chips button[aria-pressed=true]{background:var(--gold);color:#000;border-color:var(--gold)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px}}
+.card .b{padding:12px}
+.card h3{font-size:1.4rem}
+.price{font-size:1.8rem}
 .card{background:var(--panel);border:1px solid var(--gold-d);display:flex;flex-direction:column;position:relative}
 .card img,.ph{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
 .ph{display:grid;place-items:center;background:#15120a;color:var(--gold);font:900 2rem "Big Shoulders Display",sans-serif;text-transform:uppercase;text-align:center;padding:16px}
@@ -89,7 +96,9 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}
 <section id="productos">
   <div class="wrap">
     <h2>Productos</h2>
+    <input id="buscador" type="search" placeholder="Buscar producto…" aria-label="Buscar producto">
     <div class="chips" id="chips"></div>
+    <p class="count" id="count"></p>
     <div class="grid" id="grid"><p>Cargando productos…</p></div>
   </div>
 </section>
@@ -133,19 +142,25 @@ function links(root){root.querySelectorAll("[data-p]").forEach(a=>{a.href=wa(a.d
 
 function render(P){
   const cats = [...new Set(P.map(p => p.c))];
-  const chips = document.getElementById("chips"), grid = document.getElementById("grid");
-  function show(cat){
+  const chips = document.getElementById("chips"), grid = document.getElementById("grid"), buscador = document.getElementById("buscador"), count = document.getElementById("count");
+  let cat = "Todos";
+  function norm(s){ return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+  function show(){
     chips.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.c === cat));
-    grid.innerHTML = P.filter(p => cat === "Todos" || p.c === cat).map(p => {
+    const q = norm(buscador.value.trim());
+    const list = P.filter(p => (cat === "Todos" || p.c === cat) && (!q || norm(p.n).includes(q) || norm(p.d).includes(q)));
+    count.textContent = q || cat !== "Todos" ? `${list.length} producto${list.length === 1 ? "" : "s"} encontrado${list.length === 1 ? "" : "s"}` : `${list.length} productos`;
+    grid.innerHTML = list.length ? list.map(p => {
       const pr = num(p.p), old = num(p.a), off = old > pr ? Math.round((1 - pr / old) * 100) : 0;
       const img = p.f ? `<img src="${esc(p.f)}" alt="${esc(p.n)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:this.alt}))">` : `<div class="ph">${esc(p.n)}</div>`;
       return `<article class="card">${off ? `<span class="off">-${off}%</span>` : ""}${img}<div class="b"><small>${esc(p.c)}</small><h3>${esc(p.n)}</h3><small>${esc(p.d)}</small><p class="price">${money(pr)}${off ? `<s>${money(old)}</s>` : ""}</p><a class="btn" data-p="${esc(p.n)} (${money(pr)})">Pedir por WhatsApp</a></div></article>`;
-    }).join("");
+    }).join("") : `<p style="grid-column:1/-1;color:var(--muted)">No encontramos productos con ese nombre. Escríbenos por WhatsApp y te ayudamos.</p>`;
     links(grid);
   }
   chips.innerHTML = ["Todos", ...cats].map(c => `<button data-c="${esc(c)}" aria-pressed="false">${esc(c)}</button>`).join("");
-  chips.onclick = e => { if (e.target.dataset.c) show(e.target.dataset.c); };
-  show("Todos");
+  chips.onclick = e => { if (e.target.dataset.c) { cat = e.target.dataset.c; show(); } };
+  buscador.oninput = show;
+  show();
 }
 
 fetch("productos.txt?v=" + Date.now()).then(r => r.text()).then(t => {
