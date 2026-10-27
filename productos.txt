@@ -1,4 +1,4 @@
-# CADA LINEA ES UN PRODUCTO, separado por barras |
+CADA LINEA ES UN PRODUCTO, separado por barras |
 # Categoria | Nombre | Detalle | Precio | foto | Precio anterior (opcional, para mostrar oferta)
 # Para ocultar un producto, pon un # al inicio de su linea.
 # Las categorias nuevas aparecen solas como botones en la pagina.
@@ -6,4 +6,4 @@ Proteínas | Whey Protein | 5 lbs · Vainilla · 75 servicios | 80 | whey.jpg
 Proteínas | Isolate Whey | 2 lbs · Vainilla · 30 servicios | 55 | isolate.jpg
 Ganadores de masa | Mass Gainer | 5 lbs · Vainilla · 75 servicios | 40 | massgainer.jpg
 Sarms | Godzilla-Hg | 10mg Rad-140 • 10mg Mk-677 • 100 Tabletas | 60 | godzilla.jpg |70
-Sarms | Kong Rk300 | 10mg Ligandrol • 10mg Ibutamoren • 10mg Ostarine • 100 Tabletas | 60 | Kong-rk300.png | 70
+Sarms | Kong Rk300 | 10mg Ligandrol • 10mg Ibutamoren • 10mg Ostarine • 100 Tabletas | 60 | kong-rk300.png | 70
